@@ -54,6 +54,15 @@ function withPagination({ methodName = 'paginate', primaryKeyField = 'id' } = {}
       const whereQuery = paginationQuery
         ? { [Op.and]: [paginationQuery, where] }
         : where;
+      
+      let order = [];
+      if (Array.isArray(paginationField)) {
+        order = paginationField;
+      } else {
+        order.push(
+          cursorOrderIsDesc ? [paginationField, 'DESC'] : paginationField,
+        );
+      }
 
       return model.findAll({
         where: whereQuery,
@@ -61,7 +70,7 @@ function withPagination({ methodName = 'paginate', primaryKeyField = 'id' } = {}
         include,
         limit: limit + 1,
         order: [
-          cursorOrderIsDesc ? [paginationField, 'DESC'] : paginationField,
+          ...order,
           ...(paginationFieldIsNonId ? [primaryKeyField] : []),
         ],
         ...(Array.isArray(attributes) && attributes.length) ? { attributes } : {},
